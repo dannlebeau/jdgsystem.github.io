@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!--Metadatos-->
+    <meta name="author" content="Dann LeBeau">
+    <meta name="description" content="Sistemas de seguridad tokenizados">
+    <meta name="keywords" content="seguridad, factor, token, codigos, co-work">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FBI System</title>
+
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+  </head>
+  <body>
+    <h1>&#128374; FBI System &#128374;</h1>
+    <div class="card bg-dark text-center">
+      <div class="card-body">
+        <form id="login-form">
+          <h1>&#128372;&#128372;&#128372;</h1>
+          <h5 class="card-title text-center">Ingrese sus credenciales</h5>
+          <div class="row d-flex align-items-center mb-1">
+            <div class="col-12">Email:</div>
+            <div class="col-7 m-auto"><input type="text" id="email" name="email" class="form-control" /></div>
+          </div>
+          <div class="row d-flex align-items-center">
+            <div class="col-12">Password:</div>
+            <div class="col-7 m-auto"><input type="password" id="password" name="password" class="form-control" /></div>
+          </div>
+          <button class="btn bg-light my-3" type="submit">Ingresar &#128373;</button>
+        </form>
+      </div>
+    </div>
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background: black;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        height: 60vh;
+      }
+    </style>
+    <script>
+      document.getElementById('login-form').addEventListener('submit', function(event) {
+          event.preventDefault();
+          const email = document.getElementById('email').value;
+          const password = document.getElementById('password').value;
+
+          fetch('/SignIn', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/x-www-form-urlencoded',
+              },
+              body: `email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`
+          })
+          .then(response => {
+              if (!response.ok) {
+                  throw new Error('Credenciales inválidas');
+              }
+              return response.json();
+          })
+          .then(data => {
+              if (data.token) {
+                  sessionStorage.setItem('token', data.token);
+                  setTimeout(() => {
+                      sessionStorage.removeItem('token');
+                  }, 2 * 60 * 1000); // Expiración en 2 minutos
+
+                  // Mostrar el email del agente autorizado
+                  const emailElement = document.createElement('p');
+                  emailElement.textContent = `Email del agente autorizado: ${data.email}`;
+                  document.body.appendChild(emailElement);
+
+                  // Disponibilizar un hiperenlace para redirigir al agente a una ruta restringida
+                  const restrictedLink = document.createElement('a');
+                  restrictedLink.textContent = 'Ir a página restringida';
+                  restrictedLink.href = '#';
+                  restrictedLink.setAttribute('id', 'restricted-link');
+                  document.body.appendChild(restrictedLink);
+
+                  // Agregar event listener después de crear el enlace
+                  document.getElementById('restricted-link').addEventListener('click', function(event) {
+                      event.preventDefault();
+                      const token = sessionStorage.getItem('token');
+                      if (!token) {
+                          alert('Token no encontrado o expirado. Por favor, autentíquese nuevamente.');
+                          return;
+                      }
+
+                      fetch('/restricted', {
+                          method: 'GET',
+                          headers: {
+                              'Authorization': token
+                          }
+                      })
+                      .then(response => {
+                          if (response.ok) {
+                              return response.text();
+                          } else {
+                              throw new Error('No autorizado');
+                          }
+                      })
+                      .then(message => alert(message))
+                      .catch(error => alert('Error: ' + error.message));
+                  });
+              } else {
+                  alert('Credenciales inválidas');
+              }
+          })
+          .catch(error => alert('Error: ' + error.message));
+      });
+    </script>
+  </body>
+</html>

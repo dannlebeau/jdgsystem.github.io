@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!--Metadatos-->
+        <meta name="author" content="Dann LeBeau">
+        <meta name="description" content="Sistemas de seguridad tokenizados">
+        <meta name="keywords" content="seguridad, factor, token, codigos, co-work">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Token de Autenticación</title>
+</head>
+<body>
+    <h1>Token JWT</h1>
+    <div id="tokenDisplay"></div>
+
+    <script>
+        // Obtener el token del sessionStorage
+        const token = sessionStorage.getItem('token');
+
+        // Mostrar el token en la página
+        const tokenDisplay = document.getElementById('tokenDisplay');
+        tokenDisplay.textContent = `Token: ${token}`;
+    </script>
+</body>
+</html>
